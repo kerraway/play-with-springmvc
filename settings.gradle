@@ -1,0 +1,4 @@
+rootProject.name = 'play-with-springmvc'
+include 'play-with-springmvc-framework'
+include 'play-with-springmvc-example'
+

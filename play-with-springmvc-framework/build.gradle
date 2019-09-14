@@ -1,0 +1,21 @@
+group 'com.github.kerraway'
+version '1.0.0'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile(
+            'ch.qos.logback:logback-core:1.2.3',
+            'ch.qos.logback:logback-classic:1.2.3',
+    )
+    compileOnly 'org.projectlombok:lombok:1.18.8'
+    testCompile 'junit:junit:4.12'
+    testCompileOnly 'org.projectlombok:lombok:1.18.8'
+}
