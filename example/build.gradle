@@ -12,7 +12,7 @@ repositories {
 
 dependencies {
     compile(
-            project(':play-with-springmvc-framework'),
+            project(':framework'),
             'ch.qos.logback:logback-core:1.2.3',
             'ch.qos.logback:logback-classic:1.2.3',
     )
