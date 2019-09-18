@@ -4,10 +4,13 @@ import com.github.kerraway.springmvc.framework.web.handler.MappingHandler;
 import com.github.kerraway.springmvc.framework.web.handler.MappingHandlerManager;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.servlet.*;
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * @author kerraway
@@ -17,7 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 public class DispatcherServlet implements Servlet {
 
     @Override
-    public void init(ServletConfig config) throws ServletException {
+    public void init(ServletConfig config) {
     }
 
     @Override
@@ -26,21 +29,23 @@ public class DispatcherServlet implements Servlet {
     }
 
     @Override
-    public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+    public void service(ServletRequest req, ServletResponse res) throws IOException {
         logger.info("DispatcherServlet#service method.");
-        for (MappingHandler mappingHandler : MappingHandlerManager.getManager().getMappingHandlers()) {
+        MappingHandler mappingHandler = MappingHandlerManager.getManager()
+                .getMappingHandler(((HttpServletRequest) req).getRequestURI());
+        if (mappingHandler != null) {
             try {
-                if (mappingHandler.handle(req, res)) {
-                    return;
-                }
-            } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
-                e.printStackTrace();
+                mappingHandler.handle(req, res);
+            } catch (Exception e) {
+                // TODO: 2019/9/18 specific exception
+                throw new RuntimeException(String.format("Handle '%s' error.", mappingHandler.getUri()), e);
             }
+        } else {
+            logger.warn("404, not found.");
+            ((HttpServletResponse) res).setStatus(404);
+            res.getWriter().write("404, not found.");
+            res.getWriter().flush();
         }
-        logger.warn("404, not found.");
-        ((HttpServletResponse) res).setStatus(404);
-        res.getWriter().write("404, not found.");
-        res.getWriter().flush();
     }
 
     @Override

@@ -35,17 +35,15 @@ public class MappingHandler {
      *
      * @param req 请求
      * @param res 响应
-     * @return 是否处理
      * @throws IllegalAccessException
      * @throws InstantiationException
      * @throws InvocationTargetException
      * @throws IOException
      */
-    public boolean handle(ServletRequest req, ServletResponse res)
+    public void handle(ServletRequest req, ServletResponse res)
             throws IllegalAccessException, InstantiationException, InvocationTargetException, IOException {
-        String reqUri = ((HttpServletRequest) req).getRequestURI();
-        if (!uri.equals(reqUri)) {
-            return false;
+        if (!uri.equals(((HttpServletRequest) req).getRequestURI())) {
+            return;
         }
         logger.info("Handle {}", uri);
         Object[] params = new Object[paramNames.size()];
@@ -57,7 +55,6 @@ public class MappingHandler {
         Object result = method.invoke(target, params);
         res.getWriter().write(String.valueOf(result));
         res.getWriter().flush();
-        return true;
     }
 
     /**

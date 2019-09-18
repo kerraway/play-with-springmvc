@@ -3,13 +3,14 @@ package com.github.kerraway.springmvc.framework.web.handler;
 import com.github.kerraway.springmvc.framework.web.mvc.Controller;
 import com.github.kerraway.springmvc.framework.web.mvc.RequestMapping;
 import com.github.kerraway.springmvc.framework.web.mvc.RequestParam;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Mapping 处理器工厂
@@ -22,8 +23,7 @@ public class MappingHandlerManager {
 
     private static volatile MappingHandlerManager manager;
 
-    @Getter
-    private final List<MappingHandler> mappingHandlers;
+    private final Map<String, MappingHandler> mappingHandlerMap;
 
     public static MappingHandlerManager getManager() {
         if (manager == null) {
@@ -37,11 +37,21 @@ public class MappingHandlerManager {
     }
 
     private MappingHandlerManager() {
-        this.mappingHandlers = new ArrayList<>(256);
+        this.mappingHandlerMap = new HashMap<>(256);
     }
 
     /**
-     * 解析并添加  Mapping 处理器
+     * 根据 uri 获取 Mapping 处理器
+     *
+     * @param uri
+     * @return Mapping 处理器
+     */
+    public MappingHandler getMappingHandler(String uri) {
+        return mappingHandlerMap.get(uri);
+    }
+
+    /**
+     * 解析并添加 Mapping 处理器
      *
      * @param classes 一些类
      */
@@ -64,7 +74,7 @@ public class MappingHandlerManager {
             if (!method.isAnnotationPresent(RequestMapping.class)) {
                 continue;
             }
-            RequestMapping requestMapping = method.getDeclaredAnnotation(RequestMapping.class);
+            String uri = method.getDeclaredAnnotation(RequestMapping.class).value();
             List<String> paramNames = new ArrayList<>(32);
             List<Class<?>> paramTypes = new ArrayList<>(32);
             for (Parameter param : method.getParameters()) {
@@ -74,16 +84,15 @@ public class MappingHandlerManager {
                     paramTypes.add(param.getType());
                 }
             }
+            logger.info("Load request mapping '{}' from {}#{}.", uri, clazz.getName(), method.getName());
             MappingHandler mappingHandler = MappingHandler.builder()
-                    .uri(requestMapping.value())
+                    .uri(uri)
                     .method(method)
                     .clazz(clazz)
                     .paramNames(paramNames)
                     .paramTypes(paramTypes)
                     .build();
-            logger.info("Load request mapping '{}' from {}#{}.", mappingHandler.getUri(),
-                    mappingHandler.getClazz().getName(), mappingHandler.getMethod().getName());
-            this.mappingHandlers.add(mappingHandler);
+            this.mappingHandlerMap.put(uri, mappingHandler);
         }
     }
 }
