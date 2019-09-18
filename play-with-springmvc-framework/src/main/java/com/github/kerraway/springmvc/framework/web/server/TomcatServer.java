@@ -1,6 +1,6 @@
 package com.github.kerraway.springmvc.framework.web.server;
 
-import com.github.kerraway.springmvc.framework.web.servlet.FooServlet;
+import com.github.kerraway.springmvc.framework.web.servlet.DispatcherServlet;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.core.StandardContext;
@@ -25,6 +25,11 @@ public class TomcatServer {
         this(8080, args);
     }
 
+    /**
+     * 启动 Tomcat 服务
+     *
+     * @throws LifecycleException
+     */
     public void start() throws LifecycleException {
         tomcat.start();
 
@@ -32,9 +37,17 @@ public class TomcatServer {
         context.setPath("");
         context.addLifecycleListener(new Tomcat.FixContextListener());
 
-        FooServlet fooServlet = new FooServlet();
+        //just test, disabled
+        //fooServlet
+        /*FooServlet fooServlet = new FooServlet();
         Tomcat.addServlet(context, "fooServlet", fooServlet).setAsyncSupported(true);
         context.addServletMappingDecoded("/foo", "fooServlet");
+        tomcat.getHost().addChild(context);*/
+
+        //dispatcherServlet
+        DispatcherServlet dispatcherServlet = new DispatcherServlet();
+        Tomcat.addServlet(context, "dispatcherServlet", dispatcherServlet).setAsyncSupported(true);
+        context.addServletMappingDecoded("/", "dispatcherServlet");
         tomcat.getHost().addChild(context);
 
         Thread thread = new Thread("tomcat-await-thread") {
