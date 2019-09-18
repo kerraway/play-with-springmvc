@@ -1,5 +1,6 @@
 package com.github.kerraway.springmvc.framework.web.handler;
 
+import com.github.kerraway.springmvc.framework.bean.BeanFactory;
 import com.github.kerraway.springmvc.framework.web.mvc.Controller;
 import com.github.kerraway.springmvc.framework.web.mvc.RequestMapping;
 import com.github.kerraway.springmvc.framework.web.mvc.RequestParam;
@@ -24,6 +25,7 @@ public class MappingHandlerManager {
     private static volatile MappingHandlerManager manager;
 
     private final Map<String, MappingHandler> mappingHandlerMap;
+    private final BeanFactory beanFactory;
 
     public static MappingHandlerManager getManager() {
         if (manager == null) {
@@ -38,6 +40,7 @@ public class MappingHandlerManager {
 
     private MappingHandlerManager() {
         this.mappingHandlerMap = new HashMap<>(256);
+        this.beanFactory = BeanFactory.newInstance();
     }
 
     /**
@@ -69,6 +72,10 @@ public class MappingHandlerManager {
      * @param clazz 类
      */
     private void resolveMappingHandler(Class<?> clazz) {
+        Object bean = beanFactory.getBean(clazz);
+        if (bean == null) {
+            return;
+        }
         Method[] methods = clazz.getDeclaredMethods();
         for (Method method : methods) {
             if (!method.isAnnotationPresent(RequestMapping.class)) {
@@ -87,8 +94,8 @@ public class MappingHandlerManager {
             logger.info("Load request mapping '{}' from {}#{}.", uri, clazz.getName(), method.getName());
             MappingHandler mappingHandler = MappingHandler.builder()
                     .uri(uri)
+                    .target(bean)
                     .method(method)
-                    .clazz(clazz)
                     .paramNames(paramNames)
                     .paramTypes(paramTypes)
                     .build();

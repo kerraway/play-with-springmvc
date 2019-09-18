@@ -1,5 +1,6 @@
 package com.github.kerraway.springmvc.framework.starter;
 
+import com.github.kerraway.springmvc.framework.bean.BeanFactory;
 import com.github.kerraway.springmvc.framework.core.ClassScanner;
 import com.github.kerraway.springmvc.framework.web.handler.MappingHandlerManager;
 import com.github.kerraway.springmvc.framework.web.server.TomcatServer;
@@ -21,6 +22,10 @@ public class StartApp {
             //加载类
             ClassScanner scanner = ClassScanner.getScanner();
             List<Class<?>> classes = scanner.scanClassesFromJar(clazz.getPackage());
+
+            //初始化 bean
+            BeanFactory beanFactory = BeanFactory.newInstance();
+            beanFactory.init(classes);
 
             //加载 Mapping 处理器
             MappingHandlerManager mappingHandlerManager = MappingHandlerManager.getManager();

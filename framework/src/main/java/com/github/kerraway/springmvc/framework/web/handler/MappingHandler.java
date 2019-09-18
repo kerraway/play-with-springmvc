@@ -25,8 +25,8 @@ import java.util.List;
 public class MappingHandler {
 
     private final String uri;
+    private final Object target;
     private final Method method;
-    private final Class<?> clazz;
     private final List<String> paramNames;
     private final List<Class<?>> paramTypes;
 
@@ -50,8 +50,6 @@ public class MappingHandler {
         for (int i = 0; i < params.length; i++) {
             params[i] = parseParam(req.getParameter(paramNames.get(i)), paramTypes.get(i));
         }
-        // TODO: 2019/9/15 bean factory
-        Object target = clazz.newInstance();
         Object result = method.invoke(target, params);
         res.getWriter().write(String.valueOf(result));
         res.getWriter().flush();

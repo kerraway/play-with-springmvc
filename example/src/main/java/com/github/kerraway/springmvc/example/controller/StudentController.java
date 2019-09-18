@@ -1,5 +1,7 @@
 package com.github.kerraway.springmvc.example.controller;
 
+import com.github.kerraway.springmvc.example.service.StudentService;
+import com.github.kerraway.springmvc.framework.bean.Autowired;
 import com.github.kerraway.springmvc.framework.web.mvc.Controller;
 import com.github.kerraway.springmvc.framework.web.mvc.RequestMapping;
 import com.github.kerraway.springmvc.framework.web.mvc.RequestParam;
@@ -15,10 +17,13 @@ import java.util.Random;
 @Controller
 public class StudentController {
 
+    @Autowired
+    private StudentService studentService;
+
     @RequestMapping("/students/count")
     public String countStudents(@RequestParam("name") String name, @RequestParam("age") int age) {
         logger.info("StudentController.countStudents, name: {}, age: {}.", name, age);
-        return String.format("students count, name: %s, age: %d, count: %d.", name, age, new Random().nextInt(100));
+        return studentService.countStudents(name, age);
     }
 
     @RequestMapping("/students")
